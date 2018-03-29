@@ -1,0 +1,100 @@
+import java.util.List;
+
+import javafx.application.*;
+import javafx.stage.*;
+import javafx.scene.*;
+import javafx.scene.layout.*;
+import javafx.scene.control.*;
+import javafx.scene.shape.*;
+import javafx.scene.text.*;
+public class AutoCode extends Application{
+	public static void main(String[] args){
+		Application.launch(args);
+	}
+	@Override
+	public void start(Stage stage){
+		GridPane root = new GridPane();
+		Text pText = new Text("Pattern: ");
+		TextArea pArea= new TextArea();
+		Button genBtn = new Button("Generate");
+		ListView rView = new ListView();
+		genBtn.setOnAction(e -> {
+			String gen = genCode(new Text(pArea.getText()), rView.getItems());
+			TextArea genArea = new TextArea(gen);
+			Scene genScene = new Scene(genArea);
+			Stage genStage = new Stage();
+			genStage.setScene(genScene);
+			genStage.show();
+		});
+		Text rText = new Text("Replacement: ");
+		Button addBtn = new Button("Add");
+		addBtn.setOnAction(e -> {
+			Stage stag = new Stage();
+			VBox vb = new VBox();
+			TextArea content = new TextArea();
+			Button okBtn = new Button("OK");
+			okBtn.setOnAction(e2 -> {
+				String t = content.getText();
+				rView.getItems().add(t);
+				stag.close();
+			});
+			Button cancelBtn = new Button("Cancel");
+			cancelBtn.setOnAction(e2 -> {
+				stag.close();
+			});
+			vb.getChildren().addAll(content, new HBox(5, okBtn, cancelBtn));
+			Scene s = new Scene(vb);
+			stag.setScene(s);
+			stag.show();
+		});
+		Button subBtn = new Button("Delete");
+		subBtn.setOnAction(e -> {
+			try{
+				rView.getItems().remove(rView.getSelectionModel().getSelectedIndex());
+			}catch(Exception ec){
+			}
+		});
+		Button ediBtn = new Button("Edit");
+		ediBtn.setOnAction(e -> {
+			Stage stag = new Stage();
+			int index = rView.getSelectionModel().getSelectedIndex();
+			if(index == -1)return;
+			VBox vb = new VBox();
+			TextArea content = new TextArea((String)(rView.getItems().get(index)));
+			Button okBtn = new Button("OK");
+			okBtn.setOnAction(e2 -> {
+				String t = content.getText();
+				rView.getItems().set(index, t);
+				stag.close();
+			});
+			Button cancelBtn = new Button("Cancel");
+			cancelBtn.setOnAction(e2 -> {
+				stag.close();
+			});
+			vb.getChildren().addAll(content, new HBox(5, okBtn, cancelBtn));
+			Scene s = new Scene(vb);
+			stag.setScene(s);
+			stag.show();
+		});
+		root.addRow(0, pText, new HBox(5, rText, addBtn, subBtn, ediBtn));
+		root.addRow(1, pArea, rView);
+		root.addRow(2, genBtn);
+		Scene scene = new Scene(root, 800, 600);
+		stage.setScene(scene);
+		stage.show();
+	}
+	public String genCode(Text pattern, List<String>replacement){
+		String ret = "";
+		String str = replacement.get(0);
+		String[] strs = str.split(" ");
+		for(int i = 0; i < strs.length; i++){
+			String tmp = pattern.getText();
+			for(int cnt = 0; cnt < replacement.size(); cnt++){
+				String handle = "%" + (cnt + 1);
+				tmp = tmp.replaceAll(handle, replacement.get(cnt).split(" ")[i]);
+			}
+			ret += tmp;
+		}
+		return ret;
+	}
+}
